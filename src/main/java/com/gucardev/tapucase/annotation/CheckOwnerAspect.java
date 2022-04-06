@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gucardev.tapucase.exception.ExceptionMessages;
 import com.gucardev.tapucase.exception.UserNotMatchedException;
+import com.gucardev.tapucase.service.ShortUrlService;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -22,20 +24,25 @@ import java.util.Map;
 @Aspect
 @Component
 @Slf4j
+@AllArgsConstructor
 public class CheckOwnerAspect {
+
+    private final ShortUrlService shortUrlService;
 
     @Around("@annotation(CheckOwner)")
     public Object checkOwner(ProceedingJoinPoint joinPoint) throws Throwable {
-        String userId;
-        String userIdOfShortUrl;
+        Long userId;
+        Long userIdOfShortUrl;
 
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder
                 .currentRequestAttributes()).getRequest();
 
         var fields = parameters(request);
 
-        userId = fields.get("user_id");
-        userIdOfShortUrl = fields.get("url_id");
+        userId = Long.valueOf(fields.get("user_id"));
+        userIdOfShortUrl = shortUrlService.getUrlById(Long.valueOf(fields.get("url_id"))).getUser().getId();
+
+
         if (!userId.equals(userIdOfShortUrl)) {
             log.error(userId + " is different than " + userIdOfShortUrl);
             throw new UserNotMatchedException(ExceptionMessages.USER_NOT_MATCHED.getValue());
