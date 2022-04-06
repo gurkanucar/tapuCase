@@ -23,7 +23,7 @@ public class ShortUrlService {
     private final ShortUrlRepository repository;
     private final UserService userService;
     private final RandomStringGenerator randomStringGenerator;
-    private final EnvironmentData environmentData;
+
 
     public ShortUrl create(CreateShortUrlRequest createShortUrlRequest, Long id) {
 
