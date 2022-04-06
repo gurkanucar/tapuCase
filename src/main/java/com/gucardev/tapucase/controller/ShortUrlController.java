@@ -77,17 +77,23 @@ public class ShortUrlController {
 
     @CheckOwner
     @GetMapping("/user/{user_id}/detail/{url_id}")
-    public ResponseEntity<ShortUrlDto> getDetailByUserIdAndUrlId(@Valid @NotEmpty @PathVariable Long user_id,
+    public ResponseEntity<ShortUrlDto> getDetailByUserIdAndUrlId(HttpServletRequest httpServletRequest,
+                                                                 @Valid @NotEmpty @PathVariable Long user_id,
                                                                  @Valid @NotEmpty @PathVariable Long url_id) {
         ShortUrlDto dto = mapper.map(shortUrlService.getUrlById(url_id), ShortUrlDto.class);
+        dto.setShortened(environmentData.getURLBase(httpServletRequest) + "/s/" + dto.getCode());
+
         return ResponseEntity.status(HttpStatus.FOUND).body(dto);
     }
 
     @CheckOwner
     @DeleteMapping("/user/{user_id}/detail/{url_id}")
-    public ResponseEntity<ShortUrlDto> deleteShortUrlById(@Valid @NotEmpty @PathVariable Long user_id,
+    public ResponseEntity<ShortUrlDto> deleteShortUrlById(HttpServletRequest httpServletRequest,
+                                                          @Valid @NotEmpty @PathVariable Long user_id,
                                                           @Valid @NotEmpty @PathVariable Long url_id) {
         ShortUrlDto dto = mapper.map(shortUrlService.deleteById(url_id), ShortUrlDto.class);
+        dto.setShortened(environmentData.getURLBase(httpServletRequest) + "/s/" + dto.getCode());
+
         return ResponseEntity.ok(dto);
     }
 
