@@ -1,0 +1,64 @@
+package com.gucardev.tapucase.annotation;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gucardev.tapucase.exception.ExceptionMessages;
+import com.gucardev.tapucase.exception.UserNotMatchedException;
+import lombok.extern.slf4j.Slf4j;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.servlet.HandlerMapping;
+
+import javax.servlet.http.HttpServletRequest;
+import java.lang.annotation.Annotation;
+import java.util.Map;
+
+@Aspect
+@Component
+@Slf4j
+public class CheckOwnerAspect {
+
+    @Around("@annotation(CheckOwner)")
+    public Object checkOwner(ProceedingJoinPoint joinPoint) throws Throwable {
+        String userId;
+        String userIdOfShortUrl;
+
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder
+                .currentRequestAttributes()).getRequest();
+
+        var fields = parameters(request);
+
+        userId = fields.get("user_id");
+        userIdOfShortUrl = fields.get("url_id");
+        if (!userId.equals(userIdOfShortUrl)) {
+            log.error(userId + " is different than " + userIdOfShortUrl);
+            throw new UserNotMatchedException(ExceptionMessages.USER_NOT_MATCHED.getValue());
+        } else {
+            log.info("Users are matching");
+        }
+
+        return joinPoint.proceed();
+    }
+
+
+    // http servlet parameters processing
+    public static Map<String, String> parameters(HttpServletRequest request) throws JsonProcessingException {
+        var raw = request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+        ObjectMapper mapper = new ObjectMapper();
+        String data = null;
+        try {
+            data = mapper.writeValueAsString(raw);
+            log.info("Parameters: " + data);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return new ObjectMapper().readValue(data, Map.class);
+    }
+
+}
