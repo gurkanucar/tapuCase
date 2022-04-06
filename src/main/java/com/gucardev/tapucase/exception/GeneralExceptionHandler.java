@@ -66,7 +66,7 @@ public class GeneralExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<?> userNotMatchedException(UserNotMatchedException e){
         Map<String , String > errors = new HashMap<>();
         errors.put("error",e.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(errors);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errors);
     }
 
 
