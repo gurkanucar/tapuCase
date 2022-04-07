@@ -4,13 +4,14 @@
   [Open](https://github.com/gurkanucar/tapuCase/blob/master/tapuCase.postman_collection.json)
 
 ### Check Swagger Api Documentation From This EndPoint
-#### BASE_URL/swagger-ui.html#/
+#### https://tapu-case-url-shortener.herokuapp.com/swagger-ui.html#/
 
 
 
 
 
 ## Installation
+
 
 ```bash
   git clone https://github.com/gurkanucar/tapuCase.git
@@ -23,6 +24,7 @@
 
 ## API Reference
 
+### Base URL: https://tapu-case-url-shortener.herokuapp.com
 
 #### Signup user
 
