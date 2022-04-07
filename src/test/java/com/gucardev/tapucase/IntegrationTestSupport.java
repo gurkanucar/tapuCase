@@ -52,6 +52,8 @@ public class IntegrationTestSupport {
     @BeforeEach
     public void setup() {
         userRepository = mock(UserRepository.class);
+        shortUrlRepository = mock(ShortUrlRepository.class);
+        shortUrlService = mock(ShortUrlService.class);
         mapper.registerModule(new JavaTimeModule());
         mapper.configure(SerializationFeature.WRITE_DATE_KEYS_AS_TIMESTAMPS, false);
     }
