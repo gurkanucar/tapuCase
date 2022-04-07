@@ -28,8 +28,8 @@ public class UserService {
     }
 
 
-    public void checkUserById(Long id) {
-        getUserById(id);
+    public boolean checkUserById(Long id) {
+        return getUserById(id) != null;
     }
 
     public boolean isUserExists(String username) {

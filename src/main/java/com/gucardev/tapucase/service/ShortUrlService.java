@@ -30,23 +30,18 @@ public class ShortUrlService {
         String code = createShortUrlRequest.getCode();
         log.info("Code: " + code);
 
-        //Check user before
-        userService.checkUserById(id);
+           if (code == null || code.isEmpty()) {
+               code = generateCode();
+               log.info("Code generated automatically: " + code);
+           } else if (repository.findByCode(code).isPresent()) {
+               throw new CodeAlreadyExistsException(ExceptionMessages.SHORT_URL_ALREADY_EXISTS.getValue());
+           }
 
-        if (code == null || code.isEmpty()) {
-            code = generateCode();
-            log.info("Code generated automatically: " + code);
-        } else if (repository.findByCode(code).isPresent()) {
-            throw new CodeAlreadyExistsException(ExceptionMessages.SHORT_URL_ALREADY_EXISTS.getValue());
-        }
-
-
-        ShortUrl shortUrl = ShortUrl.builder()
-                .url(createShortUrlRequest.getUrl())
-                .user(userService.getUserById(id))
-                .code(code)
-                .build();
-
+           ShortUrl shortUrl = ShortUrl.builder()
+                   .url(createShortUrlRequest.getUrl())
+                   .user(userService.getUserById(id))
+                   .code(code)
+                   .build();
         return repository.save(shortUrl);
     }
 
@@ -64,8 +59,8 @@ public class ShortUrlService {
     }
 
 
-    public List<ShortUrl> getAllByUserId(Long user_id) {
-        return repository.findAllByUser(userService.getUserById(user_id));
+    public List<ShortUrl> getAllByUserId(Long userId) {
+        return repository.findAllByUser(userService.getUserById(userId));
     }
 
     public ShortUrl deleteById(Long url_id) {
