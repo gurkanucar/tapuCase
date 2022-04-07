@@ -8,6 +8,7 @@ import com.gucardev.tapucase.model.User;
 import com.gucardev.tapucase.repository.ShortUrlRepository;
 import com.gucardev.tapucase.repository.UserRepository;
 import com.gucardev.tapucase.request.CreateShortUrlRequest;
+import com.gucardev.tapucase.request.CreateUserRequest;
 import com.gucardev.tapucase.service.ShortUrlService;
 import com.gucardev.tapucase.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +19,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+
+import static org.mockito.Mockito.mock;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(locations = "classpath:application.properties")
 @DirtiesContext
@@ -29,22 +33,25 @@ public class IntegrationTestSupport {
     public MockMvc mockMvc;
 
     @Autowired
-    UserService userService;
+    public UserService userService;
 
     @Autowired
-    ShortUrlService shortUrlService;
+    public ShortUrlService shortUrlService;
 
-    @MockBean
-  public   UserRepository userRepository;
+    public UserRepository userRepository;
 
-    @MockBean
-    ShortUrlRepository shortUrlRepository;
+    public ShortUrlRepository shortUrlRepository;
+
+
+    public String SHORT_URL_CONTROLLER_BASE_URL = "/s";
+    public String USER_CONTROLLER_BASE_URL = "/user";
 
 
     public final ObjectMapper mapper = new ObjectMapper();
 
     @BeforeEach
     public void setup() {
+        userRepository = mock(UserRepository.class);
         mapper.registerModule(new JavaTimeModule());
         mapper.configure(SerializationFeature.WRITE_DATE_KEYS_AS_TIMESTAMPS, false);
     }
@@ -58,7 +65,7 @@ public class IntegrationTestSupport {
                 .build();
     }
 
-    public User generateUser(Long id,String username,String password) {
+    public User generateUser(Long id, String username, String password) {
         return User.builder()
                 .id(id)
                 .username(username)
@@ -66,15 +73,23 @@ public class IntegrationTestSupport {
                 .build();
     }
 
+    public CreateUserRequest generateCreateUserRequest(String username, String password) {
+        return CreateUserRequest.builder()
+                .username(username)
+                .password(password)
+                .build();
+    }
 
-    public CreateShortUrlRequest generateCreateShortUrlRequest(String url,String code){
+
+
+    public CreateShortUrlRequest generateCreateShortUrlRequest(String url, String code) {
         return CreateShortUrlRequest.builder()
                 .code(code)
                 .url(url)
                 .build();
     }
 
-    public ShortUrl generateShortUrl(){
+    public ShortUrl generateShortUrl() {
         return ShortUrl.builder()
                 .id(1L)
                 .code("CODE")
@@ -82,7 +97,6 @@ public class IntegrationTestSupport {
                 .user(generateUser())
                 .build();
     }
-
 
 
 }

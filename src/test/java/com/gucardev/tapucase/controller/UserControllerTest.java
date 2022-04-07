@@ -2,6 +2,8 @@ package com.gucardev.tapucase.controller;
 
 import com.gucardev.tapucase.IntegrationTestSupport;
 import com.gucardev.tapucase.exception.UserAlreadyExistsException;
+import com.gucardev.tapucase.model.User;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
@@ -12,25 +14,29 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.Mockito.*;
 
+@Slf4j
 class UserControllerTest extends IntegrationTestSupport {
 
-    public String baseUrl = "/user";
 
     @Test
     public void testSignupUserWhenUsernameDoesNotExist() throws Exception {
         final var user = generateUser();
+        final var createUserRequest = generateCreateUserRequest(
+                user.getUsername()
+                , user.getPassword());
+        String requestJson = mapper.writeValueAsString(createUserRequest);
 
-        String requestJson = mapper.writeValueAsString(generateUser());
-
-        this.mockMvc.perform(post(baseUrl + "/signup")
+        this.mockMvc.perform(post(USER_CONTROLLER_BASE_URL + "/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
                 .andExpect(status().is2xxSuccessful())
-                .andExpect(jsonPath("$").exists())
+                .andExpect(jsonPath("$.id", is(user.getId().intValue())))
                 .andExpect(jsonPath("$.username", is(user.getUsername())));
 
     }
+
 
     @Test
     public void testSignupUserWhenUsernameExists() throws Exception {
@@ -41,7 +47,7 @@ class UserControllerTest extends IntegrationTestSupport {
 
         String requestJson = mapper.writeValueAsString(generateUser());
 
-        this.mockMvc.perform(post(baseUrl + "/signup")
+        this.mockMvc.perform(post(USER_CONTROLLER_BASE_URL + "/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
                 .andExpect(status().is4xxClientError())
