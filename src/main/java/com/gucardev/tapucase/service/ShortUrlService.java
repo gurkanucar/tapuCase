@@ -70,7 +70,7 @@ public class ShortUrlService {
     }
 
 
-    private String generateCode() {
+    protected String generateCode() {
         String code;
         do {
             code = randomStringGenerator.generateRandomString().toUpperCase();

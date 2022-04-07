@@ -25,7 +25,6 @@ import static org.mockito.Mockito.*;
 class ShortUrlServiceTest extends TestSupport {
 
 
-
     private ShortUrlRepository shortUrlRepository;
 
     private UserService userService;
@@ -33,6 +32,7 @@ class ShortUrlServiceTest extends TestSupport {
     private RandomStringGenerator randomStringGenerator;
 
     private ShortUrlService shortUrlService;
+
     @BeforeEach
     public void setUp() {
         shortUrlRepository = mock(ShortUrlRepository.class);
@@ -40,6 +40,7 @@ class ShortUrlServiceTest extends TestSupport {
         randomStringGenerator = mock(RandomStringGenerator.class);
         shortUrlService = new ShortUrlService(shortUrlRepository, userService, randomStringGenerator);
     }
+
     @Test
     public void testCreateWhenCodeDoesNotExistThenSave() {
         final var expected = generateShortUrl();
@@ -93,6 +94,18 @@ class ShortUrlServiceTest extends TestSupport {
         assertThrows(ShortUrlNotFoundException.class,
                 () -> shortUrlService.getUrlByCode("CODE"));
 
+    }
+
+    @Test
+    public void testGenerateCode() {
+
+        String expected = "CODE";
+
+        when(randomStringGenerator.generateRandomString())
+                .thenReturn(expected);
+
+        var actual = shortUrlService.generateCode();
+        assertEquals(expected, actual);
 
     }
 
