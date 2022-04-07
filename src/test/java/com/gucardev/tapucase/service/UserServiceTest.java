@@ -7,43 +7,49 @@ import com.gucardev.tapucase.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class UserServiceTest extends TestSupport {
 
-    private UserService userService;
     private UserRepository userRepository;
+    private UserService userService;
 
     @BeforeEach
     void setup() {
-        userRepository = Mockito.mock(UserRepository.class);
+        userRepository = mock(UserRepository.class);
         userService = new UserService(userRepository);
     }
 
     @Test
     public void testSignupUserWhenUsernameDoesNotExistThenSave() {
         final var expected = generateUser();
-        Mockito.when(userRepository.save(expected))
+        when(userRepository.save(expected))
                 .thenReturn(expected);
-
-        Mockito.when(userRepository.findUserByUsername(expected.getUsername()))
+        when(userRepository.findUserByUsername(expected.getUsername()))
                 .thenReturn(Optional.empty());
 
         final var actual = userService.signupUser(expected);
         assertEquals(expected, actual);
-        Mockito.verify(userRepository).save(expected);
-        Mockito.verify(userRepository).findUserByUsername(expected.getUsername());
+        verify(userRepository).save(expected);
+        verify(userRepository).findUserByUsername(expected.getUsername());
     }
 
     @Test
     public void testSignupUserWhenUsernameExistsThenThrowError() {
         final var expected = generateUser(1L, "grkn", "pass");
 
-        Mockito.when(userRepository.findUserByUsername(expected.getUsername()))
+        when(userRepository.findUserByUsername(expected.getUsername()))
                 .thenReturn(Optional.ofNullable(generateUser(321L, "grkn", "pass")));
 
         Throwable exception = Assertions.assertThrows(UserAlreadyExistsException.class,
@@ -51,8 +57,8 @@ class UserServiceTest extends TestSupport {
 
         Assertions.assertEquals(UserAlreadyExistsException.class, exception.getClass());
 
-        Mockito.verify(userRepository, Mockito.times(0)).save(expected);
-        Mockito.verify(userRepository).findUserByUsername(expected.getUsername());
+        verify(userRepository, times(0)).save(expected);
+        verify(userRepository).findUserByUsername(expected.getUsername());
     }
 
 
@@ -60,28 +66,27 @@ class UserServiceTest extends TestSupport {
     public void testGetUserWhenUserIdExistsThenGetUser() {
         final var expected = generateUser(1L, "grkn", "pass");
 
-        Mockito.when(userRepository.findUserById(expected.getId()))
+        when(userRepository.findUserById(expected.getId()))
                 .thenReturn(Optional.of(expected));
 
         final var actual = userService.getUserById(expected.getId());
 
         assertEquals(expected.getId(), actual.getId());
-        Mockito.verify(userRepository).findUserById(expected.getId());
+       verify(userRepository).findUserById(expected.getId());
     }
 
     @Test
     public void testGetUserWhenUserIdDoesNotExistThenThrowError() {
         final var expected = generateUser(1L, "grkn", "pass");
 
-        Mockito.when(userRepository.findUserById(expected.getId()))
+        when(userRepository.findUserById(expected.getId()))
                 .thenReturn(Optional.empty());
 
         Throwable exception = Assertions.assertThrows(UserNotFoundException.class,
                 () -> userService.getUserById(expected.getId()));
 
         Assertions.assertEquals(UserNotFoundException.class, exception.getClass());
-        Mockito.verify(userRepository).findUserById(expected.getId());
+        verify(userRepository).findUserById(expected.getId());
     }
-
 
 }
