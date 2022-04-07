@@ -4,12 +4,15 @@ import com.gucardev.tapucase.TestSupport;
 
 import com.gucardev.tapucase.exception.CodeAlreadyExistsException;
 import com.gucardev.tapucase.exception.ShortUrlNotFoundException;
+import com.gucardev.tapucase.model.ShortUrl;
 import com.gucardev.tapucase.repository.ShortUrlRepository;
 import com.gucardev.tapucase.request.CreateShortUrlRequest;
 import com.gucardev.tapucase.util.RandomStringGenerator;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 
 
 import java.util.Optional;
@@ -22,12 +25,14 @@ import static org.mockito.Mockito.*;
 class ShortUrlServiceTest extends TestSupport {
 
 
+
     private ShortUrlRepository shortUrlRepository;
+
     private UserService userService;
+
     private RandomStringGenerator randomStringGenerator;
 
     private ShortUrlService shortUrlService;
-
     @BeforeEach
     public void setUp() {
         shortUrlRepository = mock(ShortUrlRepository.class);
@@ -35,8 +40,21 @@ class ShortUrlServiceTest extends TestSupport {
         randomStringGenerator = mock(RandomStringGenerator.class);
         shortUrlService = new ShortUrlService(shortUrlRepository, userService, randomStringGenerator);
     }
-
-
+    @Test
+    public void testCreateWhenCodeDoesNotExistThenSave() {
+        final var expected = generateShortUrl();
+        when(shortUrlRepository.findByCode(expected.getCode()))
+                .thenReturn(Optional.empty());
+        when(userService.getUserById(expected.getUser().getId()))
+                .thenReturn(expected.getUser());
+        when(shortUrlRepository.save(any())).thenReturn(expected);
+        final var actual = shortUrlService.create(
+                generateCreateShortUrlRequest(expected.getUrl(),
+                        expected.getCode()),
+                expected.getUser().getId()
+        );
+        assertEquals(expected, actual);
+    }
 
 
     @Test
