@@ -3,28 +3,22 @@ package com.gucardev.tapucase.controller;
 import com.gucardev.tapucase.annotation.CheckOwner;
 import com.gucardev.tapucase.dto.ShortUrlDto;
 import com.gucardev.tapucase.model.ShortUrl;
-import com.gucardev.tapucase.model.User;
 import com.gucardev.tapucase.request.CreateShortUrlRequest;
 import com.gucardev.tapucase.service.ShortUrlService;
 import com.gucardev.tapucase.util.EnvironmentData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -57,6 +51,7 @@ public class ShortUrlController {
 
     @GetMapping("/{code}")
     public ResponseEntity<ShortUrlDto> redirect(@Valid @NotEmpty @PathVariable String code) throws URISyntaxException {
+        log.info("Code: " + code);
         ShortUrl shortUrl = shortUrlService.getUrlByCode(code);
         URI uri = new URI(shortUrl.getUrl());
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -64,34 +59,34 @@ public class ShortUrlController {
         return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).headers(httpHeaders).build();
     }
 
-    @GetMapping("/user/{user_id}/list")
+    @GetMapping("/user/{userId}/list")
     public ResponseEntity<List<ShortUrlDto>> getAllByUserId(HttpServletRequest httpServletRequest,
-                                                            @Valid @NotEmpty @PathVariable Long user_id) {
-        List<ShortUrlDto> list = shortUrlService.getAllByUserId(user_id)
+                                                            @Valid @NotEmpty @PathVariable Long userId) {
+        List<ShortUrlDto> list = shortUrlService.getAllByUserId(userId)
                 .stream().map(x -> mapper.map(x, ShortUrlDto.class))
                 .peek(x -> x.setShortened(environmentData.getURLBase(httpServletRequest) + "/s/" + x.getCode()))
                 .collect(Collectors.toList());
-        return ResponseEntity.status(HttpStatus.FOUND).body(list);
+        return ResponseEntity.status(HttpStatus.OK).body(list);
     }
 
 
     @CheckOwner
-    @GetMapping("/user/{user_id}/detail/{url_id}")
+    @GetMapping("/user/{userId}/detail/{urlId}")
     public ResponseEntity<ShortUrlDto> getDetailByUserIdAndUrlId(HttpServletRequest httpServletRequest,
-                                                                 @Valid @NotEmpty @PathVariable Long user_id,
-                                                                 @Valid @NotEmpty @PathVariable Long url_id) {
-        ShortUrlDto dto = mapper.map(shortUrlService.getUrlById(url_id), ShortUrlDto.class);
+                                                                 @Valid @NotEmpty @PathVariable Long userId,
+                                                                 @Valid @NotEmpty @PathVariable Long urlId) {
+        ShortUrlDto dto = mapper.map(shortUrlService.getUrlById(urlId), ShortUrlDto.class);
         dto.setShortened(environmentData.getURLBase(httpServletRequest) + "/s/" + dto.getCode());
 
-        return ResponseEntity.status(HttpStatus.FOUND).body(dto);
+        return ResponseEntity.status(HttpStatus.OK).body(dto);
     }
 
     @CheckOwner
-    @DeleteMapping("/user/{user_id}/detail/{url_id}")
+    @DeleteMapping("/user/{userId}/detail/{urlId}")
     public ResponseEntity<ShortUrlDto> deleteShortUrlById(HttpServletRequest httpServletRequest,
-                                                          @Valid @NotEmpty @PathVariable Long user_id,
-                                                          @Valid @NotEmpty @PathVariable Long url_id) {
-        ShortUrlDto dto = mapper.map(shortUrlService.deleteById(url_id), ShortUrlDto.class);
+                                                          @Valid @NotEmpty @PathVariable Long userId,
+                                                          @Valid @NotEmpty @PathVariable Long urlId) {
+        ShortUrlDto dto = mapper.map(shortUrlService.deleteById(urlId), ShortUrlDto.class);
         dto.setShortened(environmentData.getURLBase(httpServletRequest) + "/s/" + dto.getCode());
 
         return ResponseEntity.ok(dto);

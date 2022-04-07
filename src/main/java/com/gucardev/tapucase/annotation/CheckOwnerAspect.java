@@ -39,8 +39,8 @@ public class CheckOwnerAspect {
 
         var fields = parameters(request);
 
-        userId = Long.valueOf(fields.get("user_id"));
-        userIdOfShortUrl = shortUrlService.getUrlById(Long.valueOf(fields.get("url_id"))).getUser().getId();
+        userId = Long.valueOf(fields.get("userId"));
+        userIdOfShortUrl = shortUrlService.getUrlById(Long.valueOf(fields.get("urlId"))).getUser().getId();
 
 
         if (!userId.equals(userIdOfShortUrl)) {
